@@ -29,10 +29,14 @@ app = FastAPI(title="atc-backend", version="0.1.0")
 # 정적 파일 설정
 base_path = os.path.dirname(os.path.dirname(__file__))
 static_path = os.path.join(base_path, "static")
-image_path = os.path.join(base_path, "앱구성")
+image_path = os.path.join(base_path, "assets")
 
-app.mount("/static", StaticFiles(directory=static_path), name="static")
-app.mount("/앱구성", StaticFiles(directory=image_path), name="앱구성")
+if os.path.exists(static_path):
+    app.mount("/static", StaticFiles(directory=static_path), name="static")
+
+if os.path.exists(image_path):
+    app.mount("/assets", StaticFiles(directory=image_path), name="assets")
+
 
 app.add_middleware(
     CORSMiddleware,
