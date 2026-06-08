@@ -10,9 +10,13 @@ window.addEventListener('load', () => {
     // 1. URL 파라미터 체크 (예: ?room=ABCD)
     const urlParams = new URLSearchParams(window.location.search);
     const roomFromUrl = urlParams.get('room');
+    
     if (roomFromUrl) {
-        document.getElementById('room-code').value = roomFromUrl.toUpperCase();
+        currentRoomCode = roomFromUrl.toUpperCase();
+        document.getElementById('room-code').value = currentRoomCode;
         showView('join-view');
+        // 닉네임 입력란에 바로 포커스
+        setTimeout(() => document.getElementById('nickname').focus(), 100);
         return;
     }
 
@@ -209,7 +213,15 @@ function startPolling() {
             const res = await fetch(`/api/status/${currentRoomCode}`);
             const data = await res.json();
             
-            updateParticipantList(data.participants);
+            // 내가 참가자 목록에 없으면 강퇴된 것임 (방금 입장한 경우는 제외)
+            if (myId && data.participants && !data.participants.find(p => p.id === myId)) {
+                alert("방장에 의해 방에서 퇴장 처리되었습니다.");
+                localStorage.clear();
+                location.reload();
+                return;
+            }
+
+            updateParticipantList(data.participants, data.host_id);
             renderMatchingUI(data); // 매칭 UI 업데이트 추가
             
             // 장소 및 시간 정보 업데이트
@@ -266,13 +278,14 @@ async function selectPartner(targetId, cardElement) {
     }
 }
 
-function updateParticipantList(participants) {
+function updateParticipantList(participants, hostId) {
     const listContainer = document.getElementById('participant-list');
     const waitMsg = document.getElementById('wait-msg');
     if (!listContainer) return;
 
     listContainer.innerHTML = "";
     const opponents = participants.filter(p => p.gender !== myGender);
+    const isHost = (myId === hostId);
 
     if (opponents.length === 0) {
         waitMsg.classList.remove('hidden');
@@ -282,10 +295,34 @@ function updateParticipantList(participants) {
             const card = document.createElement('div');
             card.className = "menu-card";
             card.style.flexDirection = "column";
-            card.innerHTML = `<div class="menu-icon" style="margin-right:0; margin-bottom:10px;">👤</div><div class="menu-title">${p.name}</div>`;
+            card.style.position = "relative";
+            
+            let kickBtnHtml = "";
+            if (isHost) {
+                kickBtnHtml = `<div onclick="event.stopPropagation(); kickMember('${p.id}')" style="position:absolute; top:5px; right:10px; color:#FF528F; font-size:18px; font-weight:bold; cursor:pointer;">×</div>`;
+            }
+
+            card.innerHTML = `${kickBtnHtml}<div class="menu-icon" style="margin-right:0; margin-bottom:10px;">👤</div><div class="menu-title">${p.name}</div>`;
             card.onclick = () => selectPartner(p.id, card);
             listContainer.appendChild(card);
         });
+    }
+}
+
+async function kickMember(targetId) {
+    if (!confirm("해당 멤버를 내보내시겠습니까?")) return;
+    try {
+        const res = await fetch(`/api/kick/${currentRoomCode}/${myId}/${targetId}`, {
+            method: 'DELETE'
+        });
+        if (res.ok) {
+            // 폴링에서 자연스럽게 업데이트됨
+        } else {
+            const err = await res.json();
+            alert(err.detail || "내보내기에 실패했습니다.");
+        }
+    } catch (e) {
+        alert("서버 연결 실패");
     }
 }
 
