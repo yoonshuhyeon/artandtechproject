@@ -59,6 +59,7 @@ class RoomState:
     participants: dict[str, dict] = field(default_factory=dict)
     picks: dict[str, str] = field(default_factory=dict)
     result_message: str = ""
+    is_matching_complete: bool = False
 
 ROOMS: dict[str, RoomState] = {}
 
@@ -116,6 +117,9 @@ async def pick_partner(room_code: str, client_id: str, data: dict):
     room = ROOMS.get(room_code.upper())
     if not room: raise HTTPException(status_code=404, detail="Room not found")
     
+    if room.is_matching_complete:
+        return {"status": "already_completed"}
+
     target_id = data.get("target_id")
     room.picks[client_id] = target_id
     
@@ -139,7 +143,6 @@ async def pick_partner(room_code: str, client_id: str, data: dict):
                     matched_males.add(m_id)
 
         # 2순위 & 3순위: 여자 우선 및 남자 몰림 처리
-        # 남은 여자들이 선택한 남자별로 그룹화
         target_to_females = {}
         for f in females:
             f_id = f['id']
@@ -154,21 +157,17 @@ async def pick_partner(room_code: str, client_id: str, data: dict):
             if m_id in matched_males: continue
             
             if len(f_ids) == 1:
-                # 단독 지목 -> 여자 우선 매칭
                 f_id = f_ids[0]
                 final_pairs.append((f_id, m_id))
                 matched_females.add(f_id)
                 matched_males.add(m_id)
             else:
-                # 몰림 발생 -> 남자의 선택을 확인 (3순위: 남자 우선)
                 m_pick = room.picks.get(m_id)
                 if m_pick in f_ids:
-                    # 남자가 자신을 지목한 여자 중 한 명을 지목했으면 그 여자와 매칭
                     final_pairs.append((m_pick, m_id))
                     matched_females.add(m_pick)
                     matched_males.add(m_id)
                 else:
-                    # 남자가 다른 사람을 지목했거나 안 했으면, 지목한 여자 중 랜덤 1명
                     selected_f = random.choice(f_ids)
                     final_pairs.append((selected_f, m_id))
                     matched_females.add(selected_f)
@@ -186,17 +185,28 @@ async def pick_partner(room_code: str, client_id: str, data: dict):
 
         # 결과 메시지 생성
         prompt = random.choice(PROMPTS)
-        msg = f"🎉 설렘 가득! 오늘의 자리 배치 🎉\n미션: {prompt}\n\n"
+        msg = f"🎉 설렘 가득! 오늘의 자리 배치 🎉\n\n"
         for f, m in final_pairs:
             msg += f"✨ {room.participants[f]['name']} ❤️ {room.participants[m]['name']}\n"
+        
+        msg += f"\n💡 미션: {prompt}"
         
         if not final_pairs:
             msg = "인원 부족으로 매칭을 진행할 수 없어요! 😢"
 
         room.result_message = msg
-        room.picks.clear() # 리셋
+        room.is_matching_complete = True
 
-    return {"status": "ok"}
+    return {"status": "ok", "voted_count": len(room.picks), "total_count": len(room.participants)}
+
+@app.post("/api/reset-matching/{room_code}")
+async def reset_matching(room_code: str):
+    room = ROOMS.get(room_code.upper())
+    if not room: raise HTTPException(status_code=404, detail="Room not found")
+    room.picks.clear()
+    room.result_message = ""
+    room.is_matching_complete = False
+    return {"status": "reset_ok"}
 
 @app.get("/api/status/{room_code}")
 async def get_status(room_code: str):
@@ -209,6 +219,7 @@ async def get_status(room_code: str):
     return {
         "participants": list(room.participants.values()),
         "result": room.result_message,
+        "is_matching_complete": room.is_matching_complete,
         "location": room.location,
         "meeting_time": room.meeting_time,
         "reservation_name": room.reservation_name,

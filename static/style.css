@@ -324,3 +324,18 @@ h1 { font-size: 22px; font-weight: 700; color: var(--gray-text); text-align: cen
 }
 .heart { font-size: 32px; color: #EEE; cursor: pointer; }
 .heart.filled { color: var(--primary-pink); }
+
+/* 로더 애니메이션 */
+.loader {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--primary-pink);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

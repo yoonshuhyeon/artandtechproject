@@ -3,6 +3,7 @@ let myNickname = "";
 let myGender = "M";
 let currentRoomCode = "";
 let pollInterval = null;
+let hasIVoted = false;
 
 // 페이지 로드 시 기존 세션 복구 및 URL 파라미터 체크
 window.addEventListener('load', () => {
@@ -27,6 +28,8 @@ window.addEventListener('load', () => {
         myId = savedId;
         myGender = savedGender || "M";
         
+        hasIVoted = localStorage.getItem('atc_has_voted') === 'true';
+
         // 상태 확인 후 데이터가 있으면 대시보드로 이동
         checkRoomAndRestore();
     }
@@ -164,6 +167,40 @@ async function createRoom() {
     }
 }
 
+// 매칭 UI 렌더링 로직 (폴링 시 호출됨)
+function renderMatchingUI(data) {
+    const votingArea = document.getElementById('matching-voting-area');
+    const resultArea = document.getElementById('matching-result-area');
+    const participantList = document.getElementById('participant-list');
+    const votedWaitingMsg = document.getElementById('voted-waiting-msg');
+    const voteProgress = document.getElementById('vote-progress');
+
+    if (!votingArea) return;
+
+    // 1. 매칭 결과가 나온 경우
+    if (data && data.result) {
+        votingArea.classList.add('hidden');
+        resultArea.classList.remove('hidden');
+        document.getElementById('matching-result-display').innerText = data.result;
+        return;
+    }
+
+    // 2. 투표 진행 중인 경우
+    resultArea.classList.add('hidden');
+    votingArea.classList.remove('hidden');
+
+    if (hasIVoted) {
+        participantList.classList.add('hidden');
+        votedWaitingMsg.classList.remove('hidden');
+        if (data && data.participants) {
+            voteProgress.innerText = `현재 참여 인원: ${data.participants.length}명`;
+        }
+    } else {
+        participantList.classList.remove('hidden');
+        votedWaitingMsg.classList.add('hidden');
+    }
+}
+
 // 폴링 로직 (2초마다 상태 확인)
 function startPolling() {
     if (pollInterval) clearInterval(pollInterval);
@@ -173,6 +210,7 @@ function startPolling() {
             const data = await res.json();
             
             updateParticipantList(data.participants);
+            renderMatchingUI(data); // 매칭 UI 업데이트 추가
             
             // 장소 및 시간 정보 업데이트
             if (data.location) document.getElementById('display-location').innerText = data.location;
@@ -209,14 +247,23 @@ function startPolling() {
 }
 
 async function selectPartner(targetId, cardElement) {
-    document.querySelectorAll('#participant-list .menu-card').forEach(c => c.style.borderColor = "#F8F8F8");
-    cardElement.style.borderColor = "var(--primary-pink)";
+    if (hasIVoted) return;
 
-    await fetch(`/api/pick/${currentRoomCode}/${myId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ target_id: targetId })
-    });
+    try {
+        const res = await fetch(`/api/pick/${currentRoomCode}/${myId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ target_id: targetId })
+        });
+        
+        if (res.ok) {
+            hasIVoted = true;
+            localStorage.setItem('atc_has_voted', 'true');
+            renderMatchingUI();
+        }
+    } catch (e) {
+        alert("투표 전송에 실패했습니다.");
+    }
 }
 
 function updateParticipantList(participants) {
@@ -239,6 +286,20 @@ function updateParticipantList(participants) {
             card.onclick = () => selectPartner(p.id, card);
             listContainer.appendChild(card);
         });
+    }
+}
+
+// 매칭 초기화 함수
+async function resetMatching() {
+    if (!confirm("자리 배치를 초기화하고 다시 투표를 시작할까요?")) return;
+    
+    try {
+        await fetch(`/api/reset-matching/${currentRoomCode}`, { method: 'POST' });
+        hasIVoted = false;
+        localStorage.removeItem('atc_has_voted');
+        renderMatchingUI();
+    } catch (e) {
+        alert("초기화에 실패했습니다.");
     }
 }
 

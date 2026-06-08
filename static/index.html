@@ -464,17 +464,39 @@
             <p style="text-align: center; color: #CCC; font-size: 11px; margin-top: auto;">* AI 분석으로 참고용이에요!</p>
         </section>
 
-        <!-- 실시간 자리배치(기존 기능) -->
+        <!-- 실시간 자리배치 -->
         <section id="matching-view" class="view hidden">
             <header>
                 <span class="back-btn" onclick="showView('dashboard-view')">&lt;</span>
                 <span style="font-weight: 700;">사랑의 짝대기</span>
                 <span></span>
             </header>
-            <div id="participant-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 20px;">
-                <!-- 동적 생성 -->
+            
+            <!-- 투표 단계 UI -->
+            <div id="matching-voting-area">
+                <p class="subtitle" style="margin-bottom: 20px; font-size: 16px; height: auto;">마음에 드는 상대방을 선택해주세요!</p>
+                <div id="participant-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 20px;">
+                    <!-- 동적 생성 -->
+                </div>
+                <div id="wait-msg" style="text-align: center; color: #AAA; margin: 20px;">상대 팀원이 아직 없습니다...</div>
+                <div id="voted-waiting-msg" class="hidden" style="text-align: center; padding: 40px 20px;">
+                    <div class="loader" style="margin: 0 auto 20px;"></div>
+                    <p style="font-weight: 600; color: var(--primary-pink);">투표 완료!</p>
+                    <p style="font-size: 14px; color: var(--light-gray); margin-top: 10px;">다른 분들이 투표를 마칠 때까지<br>잠시만 기다려주세요.</p>
+                    <p id="vote-progress" style="margin-top: 20px; font-size: 13px; color: #CCC;"></p>
+                </div>
             </div>
-            <div id="wait-msg" style="text-align: center; color: #AAA; margin: 20px;">상대 팀원이 아직 없습니다...</div>
+
+            <!-- 결과 공개 UI -->
+            <div id="matching-result-area" class="hidden" style="padding: 20px;">
+                <div class="content-box" style="text-align: center; border: 2px solid var(--primary-pink); background: var(--light-pink);">
+                    <h2 style="color: var(--primary-pink); margin-bottom: 20px;">💖 최종 자리 배치 💖</h2>
+                    <div id="matching-result-display" style="white-space: pre-line; font-size: 18px; line-height: 2; font-weight: 600; color: var(--gray-text);">
+                    </div>
+                </div>
+                <button class="btn-outline" style="margin-top: 30px; border-color: #EEE; color: #AAA;" onclick="resetMatching()">결과 초기화 (다시 하기)</button>
+            </div>
+
             <button id="disconnect-btn" class="btn-outline" style="margin-top: auto;" onclick="clearSession()">매칭 종료</button>
         </section>
 
