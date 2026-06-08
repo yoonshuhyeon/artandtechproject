@@ -4,6 +4,49 @@ let myGender = "M";
 let currentRoomCode = "";
 let pollInterval = null;
 
+// 페이지 로드 시 기존 세션 복구 및 URL 파라미터 체크
+window.addEventListener('load', () => {
+    // 1. URL 파라미터 체크 (예: ?room=ABCD)
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomFromUrl = urlParams.get('room');
+    if (roomFromUrl) {
+        document.getElementById('room-code').value = roomFromUrl.toUpperCase();
+        showView('join-view');
+        return;
+    }
+
+    // 2. 기존 세션 복구
+    const savedRoomCode = localStorage.getItem('atc_room_code');
+    const savedNickname = localStorage.getItem('atc_nickname');
+    const savedId = localStorage.getItem('atc_id');
+    const savedGender = localStorage.getItem('atc_gender');
+
+    if (savedRoomCode && savedId) {
+        currentRoomCode = savedRoomCode;
+        myNickname = savedNickname;
+        myId = savedId;
+        myGender = savedGender || "M";
+        
+        // 상태 확인 후 데이터가 있으면 대시보드로 이동
+        checkRoomAndRestore();
+    }
+});
+
+async function checkRoomAndRestore() {
+    try {
+        const res = await fetch(`/api/status/${currentRoomCode}`);
+        const data = await res.json();
+        if (data.participants && data.participants.length > 0) {
+            showView('dashboard-view');
+            startPolling();
+        } else {
+            localStorage.clear();
+        }
+    } catch (e) {
+        localStorage.clear();
+    }
+}
+
 // (QUESTION_DATA, GAME_CARDS 등 기존 데이터는 그대로 유지)
 const QUESTION_DATA = {
     'light': ["요즘 가장 빠져있는 것은?", "어릴 때 꿈은 뭐였어요?", "최근에 가장 웃겼던 일은?", "스트레스는 어떻게 푸세요?", "인생 영화나 드라마는?"],
@@ -50,6 +93,12 @@ document.getElementById('join-btn').addEventListener('click', async () => {
 
         const data = await res.json();
         myId = data.client_id;
+        
+        // 세션 저장
+        localStorage.setItem('atc_room_code', currentRoomCode);
+        localStorage.setItem('atc_nickname', myNickname);
+        localStorage.setItem('atc_id', myId);
+        localStorage.setItem('atc_gender', myGender);
         
         showView('match-confirm-view');
         startPolling(); // 폴링 시작
@@ -102,6 +151,12 @@ async function createRoom() {
         const joinData = await joinRes.json();
         myId = joinData.client_id;
 
+        // 세션 저장
+        localStorage.setItem('atc_room_code', currentRoomCode);
+        localStorage.setItem('atc_nickname', myNickname);
+        localStorage.setItem('atc_id', myId);
+        localStorage.setItem('atc_gender', myGender);
+
         showView('match-confirm-view');
         startPolling();
     } catch (e) {
@@ -132,8 +187,15 @@ function startPolling() {
             if (data.m_count !== undefined) document.getElementById('display-m-count').innerText = `${data.m_count}명`;
             if (data.f_count !== undefined) document.getElementById('display-f-count').innerText = `${data.f_count}명`;
 
+            // 방 코드 및 QR 코드 업데이트
             if (document.querySelector('.display-room-code')) {
                 document.querySelectorAll('.display-room-code').forEach(el => el.innerText = currentRoomCode);
+                
+                const inviteUrl = `${window.location.origin}/?room=${currentRoomCode}`;
+                const qrImg = document.getElementById('qrcode-img');
+                if (qrImg && !qrImg.src.includes('qrserver')) {
+                    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(inviteUrl)}`;
+                }
             }
 
             if (data.result) {
@@ -195,4 +257,30 @@ window.nextGameCard = () => { currentGameCardIndex = (currentGameCardIndex + 1) 
 window.prevGameCard = () => { currentGameCardIndex = (currentGameCardIndex - 1 + GAME_CARDS.length) % GAME_CARDS.length; document.querySelector('.game-card-item').innerText = GAME_CARDS[currentGameCardIndex]; };
 window.setLiking = (score) => { document.querySelectorAll('.heart').forEach((h, idx) => { if (idx < score) h.classList.add('filled'); else h.classList.remove('filled'); }); };
 window.sendRequest = (type) => { alert(`${type} 요청을 보냈습니다.`); showView('dashboard-view'); };
+
+// 로그아웃/매칭 종료 시 세션 삭제
+window.clearSession = () => {
+    if (confirm("정말 매칭을 종료하고 나가시겠습니까?")) {
+        localStorage.clear();
+        location.reload();
+    }
+};
+
+// 초대 링크 복사
+window.copyInviteLink = () => {
+    const inviteUrl = `${window.location.origin}/?room=${currentRoomCode}`;
+    navigator.clipboard.writeText(inviteUrl).then(() => {
+        alert("초대 링크가 클립보드에 복사되었습니다!");
+    }).catch(err => {
+        // 폴백: 수동 복사 유도
+        const tempInput = document.createElement("input");
+        document.body.appendChild(tempInput);
+        tempInput.value = inviteUrl;
+        tempInput.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+        alert("초대 링크가 복사되었습니다!");
+    });
+};
+
 document.getElementById('close-modal-btn').onclick = () => document.getElementById('result-modal').classList.add('hidden');

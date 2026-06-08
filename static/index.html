@@ -168,9 +168,13 @@
                 </div>
             </div>
             <div class="content-box" style="margin-top: 20px;">
-                <h3 style="margin-bottom: 20px;">매칭 코드</h3>
-                <div style="background: #F8F8F8; padding: 15px; border-radius: 12px; text-align: center; font-size: 24px; font-weight: 700; color: var(--primary-pink); border: 2px dashed #FFD0E0;">
-                    <span id="display-room-code">ABCD</span>
+                <h3 style="margin-bottom: 20px;">매칭 코드 & QR</h3>
+                <div style="background: #F8F8F8; padding: 15px; border-radius: 12px; text-align: center; border: 2px dashed #FFD0E0;">
+                    <div class="display-room-code" style="font-size: 28px; font-weight: 800; color: var(--primary-pink); margin-bottom: 15px;">ABCD</div>
+                    <div id="qrcode-container" style="background: white; padding: 10px; display: inline-block; border-radius: 10px; margin-bottom: 15px;">
+                        <img id="qrcode-img" src="" alt="QR Code" style="width: 150px; height: 150px; display: block;">
+                    </div>
+                    <button onclick="copyInviteLink()" class="btn-outline" style="height: 40px; font-size: 13px; margin-bottom: 0;">초대 링크 복사하기</button>
                 </div>
             </div>
             <button onclick="showView('match-confirm-view')" class="btn-full">뒤로 가기</button>
@@ -471,7 +475,7 @@
                 <!-- 동적 생성 -->
             </div>
             <div id="wait-msg" style="text-align: center; color: #AAA; margin: 20px;">상대 팀원이 아직 없습니다...</div>
-            <button id="disconnect-btn" class="btn-outline" style="margin-top: auto;">매칭 종료</button>
+            <button id="disconnect-btn" class="btn-outline" style="margin-top: auto;" onclick="clearSession()">매칭 종료</button>
         </section>
 
         <!-- 결과 모달 -->
