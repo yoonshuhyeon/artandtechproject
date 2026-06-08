@@ -53,6 +53,9 @@ app.add_middleware(
 @dataclass
 class RoomState:
     code: str
+    location: str = ""
+    meeting_time: str = ""
+    reservation_name: str = ""
     participants: dict[str, dict] = field(default_factory=dict)
     picks: dict[str, str] = field(default_factory=dict)
     result_message: str = ""
@@ -63,11 +66,28 @@ ROOMS: dict[str, RoomState] = {}
 async def read_index():
     return FileResponse(os.path.join(static_path, "index.html"))
 
+@app.post("/api/create")
+async def create_room(data: dict):
+    room_code = data.get("room_code", "").upper()
+    if not room_code:
+        room_code = uuid.uuid4().hex[:4].upper()
+    
+    if room_code in ROOMS:
+        raise HTTPException(status_code=400, detail="이미 존재하는 방 코드입니다.")
+    
+    ROOMS[room_code] = RoomState(
+        code=room_code,
+        location=data.get("location", "장소 미정"),
+        meeting_time=data.get("meeting_time", "시간 미정"),
+        reservation_name=data.get("reservation_name", "")
+    )
+    return {"room_code": room_code}
+
 @app.post("/api/join/{room_code}")
 async def join_room(room_code: str, data: dict):
     room_code = room_code.upper()
     if room_code not in ROOMS:
-        ROOMS[room_code] = RoomState(code=room_code)
+        raise HTTPException(status_code=404, detail="방을 찾을 수 없습니다.")
     
     room = ROOMS[room_code]
     client_id = uuid.uuid4().hex[:4]
@@ -121,7 +141,15 @@ async def get_status(room_code: str):
     room = ROOMS.get(room_code.upper())
     if not room: return {"participants": [], "result": ""}
     
+    m_count = len([p for p in room.participants.values() if p['gender'] == 'M'])
+    f_count = len([p for p in room.participants.values() if p['gender'] == 'F'])
+    
     return {
         "participants": list(room.participants.values()),
-        "result": room.result_message
+        "result": room.result_message,
+        "location": room.location,
+        "meeting_time": room.meeting_time,
+        "reservation_name": room.reservation_name,
+        "m_count": m_count,
+        "f_count": f_count
     }

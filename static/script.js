@@ -41,6 +41,13 @@ document.getElementById('join-btn').addEventListener('click', async () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ nickname: myNickname, gender: myGender })
         });
+        
+        if (!res.ok) {
+            const err = await res.json();
+            alert(err.detail || "입장에 실패했습니다.");
+            return;
+        }
+
         const data = await res.json();
         myId = data.client_id;
         
@@ -50,6 +57,57 @@ document.getElementById('join-btn').addEventListener('click', async () => {
         alert("서버 연결에 실패했습니다.");
     }
 });
+
+// 방 생성 로직
+async function createRoom() {
+    const code = document.getElementById('create-room-code').value.trim().toUpperCase();
+    const location = document.getElementById('create-location').value.trim();
+    const time = document.getElementById('create-time').value.trim();
+    const reservation = document.getElementById('create-reservation').value.trim();
+    const nickname = document.getElementById('create-nickname').value.trim();
+
+    if (!location || !time || !nickname) {
+        alert("모든 정보를 입력해주세요!");
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                room_code: code, 
+                location: location, 
+                meeting_time: time,
+                reservation_name: reservation 
+            })
+        });
+        
+        if (!res.ok) {
+            const err = await res.json();
+            alert(err.detail || "방 생성에 실패했습니다.");
+            return;
+        }
+
+        const data = await res.json();
+        currentRoomCode = data.room_code;
+        myNickname = nickname;
+
+        // 생성 후 바로 입장
+        const joinRes = await fetch(`/api/join/${currentRoomCode}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nickname: myNickname, gender: myGender })
+        });
+        const joinData = await joinRes.json();
+        myId = joinData.client_id;
+
+        showView('match-confirm-view');
+        startPolling();
+    } catch (e) {
+        alert("서버 연결에 실패했습니다.");
+    }
+}
 
 // 폴링 로직 (2초마다 상태 확인)
 function startPolling() {
@@ -61,6 +119,23 @@ function startPolling() {
             
             updateParticipantList(data.participants);
             
+            // 장소 및 시간 정보 업데이트
+            if (data.location) document.getElementById('display-location').innerText = data.location;
+            if (data.meeting_time) document.getElementById('display-time').innerText = data.meeting_time;
+            if (data.reservation_name) {
+                document.getElementById('display-reservation').innerText = data.reservation_name;
+            } else {
+                document.getElementById('display-reservation').innerText = "-";
+            }
+            
+            // 실시간 인원 정보 업데이트
+            if (data.m_count !== undefined) document.getElementById('display-m-count').innerText = `${data.m_count}명`;
+            if (data.f_count !== undefined) document.getElementById('display-f-count').innerText = `${data.f_count}명`;
+
+            if (document.querySelector('.display-room-code')) {
+                document.querySelectorAll('.display-room-code').forEach(el => el.innerText = currentRoomCode);
+            }
+
             if (data.result) {
                 document.getElementById('result-text').innerText = data.result;
                 document.getElementById('result-modal').classList.remove('hidden');
