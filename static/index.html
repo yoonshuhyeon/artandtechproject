@@ -279,13 +279,6 @@
                     </div>
                     <span class="arrow-right">></span>
                 </div>
-                <div class="menu-card" onclick="showView('liking-view')">
-                    <div class="menu-info">
-                        <div class="menu-title">호감도 확인 <span style="background: #FFE0EA; color: var(--primary-pink); font-size: 10px; padding: 2px 6px; border-radius: 10px;">HOT</span></div>
-                        <div class="menu-desc">상대방이 나를 어떻게 생각할지 궁금해요?</div>
-                    </div>
-                    <span class="arrow-right">></span>
-                </div>
                 
                 <button class="btn-full" style="background: #FFE0EA; color: var(--primary-pink); margin-top: 20px;" onclick="showView('matching-view')">매칭 현황 보기 ></button>
             </div>
@@ -293,7 +286,6 @@
                 <div class="nav-item active" onclick="showView('dashboard-view')"><span class="nav-icon">🏠</span>홈</div>
                 <div class="nav-item" onclick="showView('matching-view')"><span class="nav-icon">👥</span>매칭</div>
                 <div class="nav-item" onclick="showView('question-view')"><span class="nav-icon">💬</span>대화</div>
-                <div class="nav-item" onclick="showView('liking-view')"><span class="nav-icon">⭐</span>추억</div>
                 <div class="nav-item" onclick="showView('settings-view')"><span class="nav-icon">👤</span>마이</div>
             </nav>
         </section>
@@ -427,41 +419,6 @@
                 <button class="btn-full" style="flex: 1; margin-top: 0;" onclick="nextGameCard()">다음 카드</button>
             </div>
             <button class="btn-outline" style="margin-top: 15px; border: none; background: #F8F8F8; color: #AAA;" onclick="showView('game-view')">게임 종료</button>
-        </section>
-
-        <!-- 11. 호감도 확인 -->
-        <section id="liking-view" class="view hidden">
-            <header>
-                <span class="back-btn" onclick="showView('dashboard-view')">&lt;</span>
-                <span style="font-weight: 700;">내 호감도 확인 (비밀)</span>
-                <span></span>
-            </header>
-            <div style="padding: 20px;">
-                <h3>내가 느끼는 호감도</h3>
-                <div class="heart-container">
-                    <span class="heart" onclick="setLiking(1)">❤️</span>
-                    <span class="heart" onclick="setLiking(2)">❤️</span>
-                    <span class="heart" onclick="setLiking(3)">❤️</span>
-                    <span class="heart" onclick="setLiking(4)">❤️</span>
-                    <span class="heart" onclick="setLiking(5)">❤️</span>
-                </div>
-                <div style="margin-top: 40px;">
-                    <h3>상대방 호감도 (AI 추정)</h3>
-                    <div style="margin-top: 20px;">
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
-                            <div style="display: flex; align-items: center;">
-                                <div style="width: 40px; height: 40px; background: #EEE; border-radius: 50%; margin-right: 15px;"></div>
-                                <div>
-                                    <div style="font-weight: 700;">김민수</div>
-                                    <div style="font-size: 12px; color: #888;">호감 있어 보여요 😊</div>
-                                </div>
-                            </div>
-                            <div style="color: var(--primary-pink); font-weight: 700;">80%</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <p style="text-align: center; color: #CCC; font-size: 11px; margin-top: auto;">* AI 분석으로 참고용이에요!</p>
         </section>
 
         <!-- 실시간 자리배치 -->

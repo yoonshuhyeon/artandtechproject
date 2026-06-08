@@ -353,7 +353,6 @@ function selectItem(element) {
 }
 window.nextGameCard = () => { currentGameCardIndex = (currentGameCardIndex + 1) % GAME_CARDS.length; document.querySelector('.game-card-item').innerText = GAME_CARDS[currentGameCardIndex]; };
 window.prevGameCard = () => { currentGameCardIndex = (currentGameCardIndex - 1 + GAME_CARDS.length) % GAME_CARDS.length; document.querySelector('.game-card-item').innerText = GAME_CARDS[currentGameCardIndex]; };
-window.setLiking = (score) => { document.querySelectorAll('.heart').forEach((h, idx) => { if (idx < score) h.classList.add('filled'); else h.classList.remove('filled'); }); };
 window.sendRequest = (type) => { alert(`${type} 요청을 보냈습니다.`); showView('dashboard-view'); };
 
 // 로그아웃/매칭 종료 시 세션 삭제
