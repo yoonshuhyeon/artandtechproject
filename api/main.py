@@ -90,10 +90,16 @@ async def join_room(room_code: str, data: dict):
         raise HTTPException(status_code=404, detail="방을 찾을 수 없습니다.")
     
     room = ROOMS[room_code]
-    client_id = uuid.uuid4().hex[:4]
     
     gender = data.get("gender", "M")
     nickname = data.get("nickname", "익명").strip()
+    
+    # 닉네임 중복 체크
+    for p in room.participants.values():
+        if p['name'] == nickname:
+            raise HTTPException(status_code=400, detail="이미 사용 중인 닉네임입니다.")
+            
+    client_id = uuid.uuid4().hex[:4]
     team = "남성" if gender == "M" else "여성"
     
     room.participants[client_id] = {
@@ -113,26 +119,82 @@ async def pick_partner(room_code: str, client_id: str, data: dict):
     target_id = data.get("target_id")
     room.picks[client_id] = target_id
     
-    # 매칭 로직 (모두 투표 시 결과 생성)
+    # 모든 인원이 투표했을 때 매칭 시작 (최소 2명 이상)
     if len(room.picks) >= len(room.participants) and len(room.participants) > 1:
-        # (기존 매칭 로직과 동일)
         males = [p for p in room.participants.values() if p['gender'] == 'M']
         females = [p for p in room.participants.values() if p['gender'] == 'F']
+        
+        matched_males = set()
+        matched_females = set()
         final_pairs = []
+
+        # 1순위: 서로 지목 (Mutual)
+        for f in females:
+            f_id = f['id']
+            m_id = room.picks.get(f_id)
+            if m_id and room.picks.get(m_id) == f_id:
+                if f_id not in matched_females and m_id not in matched_males:
+                    final_pairs.append((f_id, m_id))
+                    matched_females.add(f_id)
+                    matched_males.add(m_id)
+
+        # 2순위 & 3순위: 여자 우선 및 남자 몰림 처리
+        # 남은 여자들이 선택한 남자별로 그룹화
+        target_to_females = {}
+        for f in females:
+            f_id = f['id']
+            if f_id in matched_females: continue
+            m_id = room.picks.get(f_id)
+            if m_id and m_id not in matched_males:
+                if m_id not in target_to_females:
+                    target_to_females[m_id] = []
+                target_to_females[m_id].append(f_id)
+
+        for m_id, f_ids in target_to_females.items():
+            if m_id in matched_males: continue
+            
+            if len(f_ids) == 1:
+                # 단독 지목 -> 여자 우선 매칭
+                f_id = f_ids[0]
+                final_pairs.append((f_id, m_id))
+                matched_females.add(f_id)
+                matched_males.add(m_id)
+            else:
+                # 몰림 발생 -> 남자의 선택을 확인 (3순위: 남자 우선)
+                m_pick = room.picks.get(m_id)
+                if m_pick in f_ids:
+                    # 남자가 자신을 지목한 여자 중 한 명을 지목했으면 그 여자와 매칭
+                    final_pairs.append((m_pick, m_id))
+                    matched_females.add(m_pick)
+                    matched_males.add(m_id)
+                else:
+                    # 남자가 다른 사람을 지목했거나 안 했으면, 지목한 여자 중 랜덤 1명
+                    selected_f = random.choice(f_ids)
+                    final_pairs.append((selected_f, m_id))
+                    matched_females.add(selected_f)
+                    matched_males.add(m_id)
+
+        # 4순위: 나머지 랜덤 매칭
+        remaining_f = [f['id'] for f in females if f['id'] not in matched_females]
+        remaining_m = [m['id'] for m in males if m['id'] not in matched_males]
+        random.shuffle(remaining_f)
+        random.shuffle(remaining_m)
         
-        # 간단 매칭 예시
-        f_ids = [p['id'] for p in females]
-        m_ids = [p['id'] for p in males]
-        random.shuffle(f_ids); random.shuffle(m_ids)
-        
-        pairs = list(zip(f_ids, m_ids))
+        extra_pairs = list(zip(remaining_f, remaining_m))
+        for f, m in extra_pairs:
+            final_pairs.append((f, m))
+
+        # 결과 메시지 생성
         prompt = random.choice(PROMPTS)
-        msg = f"🎉 오늘의 자리 배치 발표! 🎉\n미션: {prompt}\n\n"
-        for f, m in pairs:
-            msg += f"✨ {room.participants[f]['name']} X {room.participants[m]['name']}\n"
+        msg = f"🎉 설렘 가득! 오늘의 자리 배치 🎉\n미션: {prompt}\n\n"
+        for f, m in final_pairs:
+            msg += f"✨ {room.participants[f]['name']} ❤️ {room.participants[m]['name']}\n"
         
+        if not final_pairs:
+            msg = "인원 부족으로 매칭을 진행할 수 없어요! 😢"
+
         room.result_message = msg
-        room.picks.clear() # 다음 게임을 위해 리셋
+        room.picks.clear() # 리셋
 
     return {"status": "ok"}
 
