@@ -248,10 +248,7 @@ function startPolling() {
                 }
             }
 
-            if (data.result) {
-                document.getElementById('result-text').innerText = data.result;
-                document.getElementById('result-modal').classList.remove('hidden');
-            }
+            // 전역 모달 표시 로직 삭제 (매칭 탭에서만 보이게 함)
         } catch (e) {
             console.error("Polling error", e);
         }
