@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>요:앵이팅 - 실시간 과팅 도우미</title>
+    <title>썸웨워 - 실시간 과팅 도우미</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
@@ -12,9 +12,9 @@
         <section id="intro-view" class="view">
             <h2 style="text-align: center; margin-bottom: 20px;">도우미 소개</h2>
             <div style="text-align: center; margin-bottom: 30px;">
-                <img src="/앱구성/도우미소개.png" alt="앵이" style="width: 250px; height: auto;">
+                <img src="/assets/helper.png" alt="앵이" style="width: 250px; height: auto;">
             </div>
-            <p class="subtitle">여러분의 든든한 과팅 파트너<br><span style="color: var(--primary-pink); font-weight: 700;">'요:앵이팅'</span>이에요!<br><br>좋은 만남이 될 수 있도록<br>최선을 다해 도와드릴게요!</p>
+            <p class="subtitle">여러분의 든든한 과팅 파트너<br><span style="color: var(--primary-pink); font-weight: 700;">'썸웨워'</span>이에요!<br><br>좋은 만남이 될 수 있도록<br>최선을 다해 도와드릴게요!</p>
             <button onclick="showView('loading-view')" class="btn-full">시작하기</button>
         </section>
 
@@ -25,13 +25,12 @@
                     <span style="font-size: 30px; color: white;">❤️</span>
                 </div>
                 <h3>실시간 과팅 도우미 앱</h3>
-                <h1 style="color: var(--primary-pink); margin-top: 5px;">요:앵이팅</h1>
+                <h1 style="color: var(--primary-pink); margin-top: 5px;">썸웨워</h1>
                 <p class="subtitle">과팅이 잡히면, 그 순간부터<br>당신의 실시간 주선자가 되어드려요.</p>
                 <div style="text-align: left; padding: 0 40px; color: var(--gray-text); font-size: 14px;">
                     <p style="margin-bottom: 12px;"><span style="color: var(--primary-pink); margin-right: 10px;">●</span> 실시간 매칭 정보</p>
                     <p style="margin-bottom: 12px;"><span style="color: var(--primary-pink); margin-right: 10px;">●</span> 대화 주제 & 분위기 코칭</p>
                     <p style="margin-bottom: 12px;"><span style="color: var(--primary-pink); margin-right: 10px;">●</span> 게임 & 활동 추천</p>
-                    <p style="margin-bottom: 12px;"><span style="color: var(--primary-pink); margin-right: 10px;">●</span> 위급 상황 SOS</p>
                     <p><span style="color: var(--primary-pink); margin-right: 10px;">●</span> 과팅 후 리뷰 & 분석</p>
                 </div>
             </div>
@@ -40,49 +39,224 @@
 
         <!-- 3. 입장 (Join) -->
         <section id="join-view" class="view hidden">
-            <h1>룸 입장하기</h1>
-            <input type="text" id="room-code" placeholder="룸 코드 (예: ABCD)" maxlength="6">
-            <input type="text" id="nickname" placeholder="닉네임">
-            <div class="tab-container" style="background: white; border: 1px solid #EEE;">
-                <div class="tab-item active" onclick="setGender('M', this)">남성</div>
-                <div class="tab-item" onclick="setGender('F', this)">여성</div>
+            <h1 style="margin-top: 40px; margin-bottom: 40px;">룸 입장하기</h1>
+            
+            <div class="input-group">
+                <label for="room-code">룸 코드</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🔑</span>
+                    <input type="text" id="room-code" placeholder="예: ABCD" maxlength="6">
+                </div>
             </div>
-            <button id="join-btn" class="btn-full">입장하기</button>
+
+            <div class="input-group">
+                <label for="nickname">닉네임</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">👤</span>
+                    <input type="text" id="nickname" placeholder="닉네임 입력">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>성별 선택</label>
+                <div class="tab-container" style="background: #F8F8F8; border: none; margin-top: 10px;">
+                    <div class="tab-item active" onclick="setGender('M', this)">남성</div>
+                    <div class="tab-item" onclick="setGender('F', this)">여성</div>
+                </div>
+            </div>
+
+            <button id="join-btn" class="btn-full" style="margin-top: 20px;">입장하기</button>
+            <p style="text-align: center; margin-top: 20px; font-size: 14px; color: var(--light-gray);">
+                방이 없으신가요? <span onclick="showView('create-room-view')" style="color: var(--primary-pink); font-weight: 700; cursor: pointer; text-decoration: underline;">새로운 방 만들기</span>
+            </p>
+        </section>
+
+        <!-- 3-1. 방 만들기 (Create) -->
+        <section id="create-room-view" class="view hidden">
+            <header>
+                <span class="back-btn" onclick="showView('join-view')">&lt;</span>
+                <span style="font-weight: 700;">새로운 방 만들기</span>
+                <span></span>
+            </header>
+            
+            <div class="input-group" style="margin-top: 20px;">
+                <label for="create-room-code">룸 코드 설정</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🔑</span>
+                    <input type="text" id="create-room-code" placeholder="예: ABCD (비워두면 자동생성)" maxlength="6">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>목표 인원수</label>
+                <div style="display: flex; gap: 10px;">
+                    <div class="input-wrapper" style="flex: 1;">
+                        <span class="input-icon">♂️</span>
+                        <input type="number" id="create-male-count" placeholder="남성 수" min="0">
+                    </div>
+                    <div class="input-wrapper" style="flex: 1;">
+                        <span class="input-icon">♀️</span>
+                        <input type="number" id="create-female-count" placeholder="여성 수" min="0">
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="create-location">과팅 장소</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">📍</span>
+                    <input type="text" id="create-location" placeholder="예: 신촌 앵이 포차">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="create-time">모임 시간</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">⏰</span>
+                    <input type="text" id="create-time" placeholder="예: 오늘 오후 7시">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="create-reservation">예약자명 (선택)</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">📝</span>
+                    <input type="text" id="create-reservation" placeholder="예: 홍길동 (없으면 비워두기)">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="create-nickname">내 닉네임</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">👤</span>
+                    <input type="text" id="create-nickname" placeholder="닉네임 입력">
+                </div>
+            </div>
+
+            <button onclick="createRoom()" class="btn-full" style="margin-top: 20px;">방 생성하고 입장하기</button>
         </section>
 
         <!-- 4. 매칭 확정 (Matching Confirm) -->
         <section id="match-confirm-view" class="view hidden">
             <h1>매칭이 확정되었어요! 🎉</h1>
-            <p class="subtitle">좋은 만남을 위해 미리 준비해볼까요?</p>
-            <div class="menu-card">
+            <p class="subtitle" style="margin-bottom: 40px;">좋은 만남을 위해 미리 준비해볼까요?</p>
+            <div class="menu-card" onclick="showView('meeting-info-view')">
                 <div class="menu-icon">📱</div>
                 <div class="menu-info"><div class="menu-title">과팅 정보 확인</div></div>
                 <span class="arrow-right">></span>
             </div>
-            <div class="menu-card">
-                <div class="menu-icon">❗</div>
-                <div class="menu-info"><div class="menu-title">상대방 정보 미리보기</div></div>
-                <span class="arrow-right">></span>
-            </div>
-            <div class="menu-card">
+            <div class="menu-card" onclick="showView('location-time-view')">
                 <div class="menu-icon">😊</div>
                 <div class="menu-info"><div class="menu-title">과팅 장소 & 시간</div></div>
                 <span class="arrow-right">></span>
             </div>
-            <div class="menu-card">
+            <div class="menu-card" onclick="showView('feature-guide-view')">
                 <div class="menu-icon">📖</div>
                 <div class="menu-info"><div class="menu-title">실시간 도우미 기능 안내</div></div>
                 <span class="arrow-right">></span>
             </div>
-            <button onclick="showView('dashboard-view')" class="btn-full">과팅 준비 시작</button>
+            <button onclick="showView('dashboard-view')" class="btn-full" style="margin-top: 40px;">과팅 준비 시작</button>
+        </section>
+
+        <!-- 4-1. 과팅 정보 확인 -->
+        <section id="meeting-info-view" class="view hidden">
+            <header>
+                <span class="back-btn" onclick="showView('match-confirm-view')">&lt;</span>
+                <span style="font-weight: 700;">과팅 정보 확인</span>
+                <span></span>
+            </header>
+            <div class="content-box">
+                <h3 style="margin-bottom: 20px;">실시간 참여 인원</h3>
+                <div class="info-item">
+                    <span class="info-label">남성 참여자</span>
+                    <span id="display-m-count" class="info-value">0명</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">여성 참여자</span>
+                    <span id="display-f-count" class="info-value">0명</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">현재 상태</span>
+                    <span class="info-value" style="color: var(--primary-pink);">참여 중...</span>
+                </div>
+            </div>
+            <div class="content-box" style="margin-top: 20px;">
+                <h3 style="margin-bottom: 20px;">매칭 코드 & QR</h3>
+                <div style="background: #F8F8F8; padding: 15px; border-radius: 12px; text-align: center; border: 2px dashed #FFD0E0;">
+                    <div class="display-room-code" style="font-size: 28px; font-weight: 800; color: var(--primary-pink); margin-bottom: 15px;">ABCD</div>
+                    <div id="qrcode-container" style="background: white; padding: 10px; display: inline-block; border-radius: 10px; margin-bottom: 15px;">
+                        <img id="qrcode-img" src="" alt="QR Code" style="width: 150px; height: 150px; display: block;">
+                    </div>
+                    <button onclick="copyInviteLink()" class="btn-outline" style="height: 40px; font-size: 13px; margin-bottom: 0;">초대 링크 복사하기</button>
+                </div>
+            </div>
+            <button onclick="showView('match-confirm-view')" class="btn-full">뒤로 가기</button>
+        </section>
+
+        <!-- 4-2. 과팅 장소 & 시간 -->
+        <section id="location-time-view" class="view hidden">
+            <header>
+                <span class="back-btn" onclick="showView('match-confirm-view')">&lt;</span>
+                <span style="font-weight: 700;">장소 및 시간 안내</span>
+                <span></span>
+            </header>
+            <div class="content-box">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <span style="font-size: 50px;">📍</span>
+                </div>
+                <h2 id="display-location" style="text-align: center; margin-bottom: 10px;">장소 정보 불러오는 중...</h2>
+                <p style="text-align: center; color: var(--light-gray); font-size: 14px; margin-bottom: 20px;">정보가 정확하지 않으면 대표에게 문의하세요</p>
+                <div class="info-item">
+                    <span class="info-label">모임 시간</span>
+                    <span id="display-time" class="info-value">시간 정보 불러오는 중...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">예약자명</span>
+                    <span id="display-reservation" class="info-value">-</span>
+                </div>
+            </div>
+            <button onclick="showView('match-confirm-view')" class="btn-full">뒤로 가기</button>
+        </section>
+
+        <!-- 4-3. 실시간 도우미 기능 안내 -->
+        <section id="feature-guide-view" class="view hidden">
+            <header>
+                <span class="back-btn" onclick="showView('match-confirm-view')">&lt;</span>
+                <span style="font-weight: 700;">기능 안내</span>
+                <span></span>
+            </header>
+            <div style="padding: 10px;">
+                <div class="guide-card">
+                    <span class="guide-icon">💬</span>
+                    <div>
+                        <div class="menu-title">아이스브레이킹</div>
+                        <p class="menu-desc">어색한 첫 만남, AI가 추천하는 질문 카드로 분위기를 자연스럽게 풀어보세요.</p>
+                    </div>
+                </div>
+                <div class="guide-card">
+                    <span class="guide-icon">👥</span>
+                    <div>
+                        <div class="menu-title">사랑의 짝대기</div>
+                        <p class="menu-desc">과팅 도중 자리 배치가 필요할 때, 랜덤 혹은 분석을 통한 최적의 자리를 추천해 드려요.</p>
+                    </div>
+                </div>
+                <div class="guide-card">
+                    <span class="guide-icon">🚨</span>
+                    <div>
+                        <div class="menu-title">SOS 긴급 도우미</div>
+                        <p class="menu-desc">곤란한 상황인가요? '화장실 자리비우기'나 '지인 호출' 기능을 몰래 사용해 보세요.</p>
+                    </div>
+                </div>
+            </div>
+            <button onclick="showView('match-confirm-view')" class="btn-full" style="margin-top: 20px;">확인했습니다</button>
         </section>
 
         <!-- 5. 대시보드 (Main Title) -->
         <section id="dashboard-view" class="view hidden" style="padding: 0;">
             <header>
-                <span style="font-size: 20px;" onclick="showView('intro-view')">❤️</span>
-                <span style="font-weight: 700;">요:앵이팅</span>
-                <span style="font-size: 20px;" onclick="showView('sos-view')">🔔</span>
+                <span style="font-size: 20px;">❤️</span>
+                <span style="font-weight: 700;">썸웨워</span>
+                <span></span>
             </header>
             <div style="padding: 20px;">
                 <div style="display: flex; justify-content: center; gap: 5px; margin-bottom: 20px;">
@@ -118,13 +292,6 @@
                     </div>
                     <span class="arrow-right">></span>
                 </div>
-                <div class="menu-card" onclick="showView('liking-view')">
-                    <div class="menu-info">
-                        <div class="menu-title">호감도 확인 <span style="background: #FFE0EA; color: var(--primary-pink); font-size: 10px; padding: 2px 6px; border-radius: 10px;">HOT</span></div>
-                        <div class="menu-desc">상대방이 나를 어떻게 생각할지 궁금해요?</div>
-                    </div>
-                    <span class="arrow-right">></span>
-                </div>
                 
                 <button class="btn-full" style="background: #FFE0EA; color: var(--primary-pink); margin-top: 20px;" onclick="showView('matching-view')">매칭 현황 보기 ></button>
             </div>
@@ -132,7 +299,6 @@
                 <div class="nav-item active" onclick="showView('dashboard-view')"><span class="nav-icon">🏠</span>홈</div>
                 <div class="nav-item" onclick="showView('matching-view')"><span class="nav-icon">👥</span>매칭</div>
                 <div class="nav-item" onclick="showView('question-view')"><span class="nav-icon">💬</span>대화</div>
-                <div class="nav-item" onclick="showView('liking-view')"><span class="nav-icon">⭐</span>추억</div>
                 <div class="nav-item" onclick="showView('settings-view')"><span class="nav-icon">👤</span>마이</div>
             </nav>
         </section>
@@ -145,9 +311,9 @@
                 <span></span>
             </header>
             <div class="tab-container">
-                <div class="tab-item active">가벼운 질문</div>
-                <div class="tab-item">깊은 질문</div>
-                <div class="tab-item">재미있는 질문</div>
+                <div class="tab-item active" onclick="loadQuestions('light', this)">가벼운 질문</div>
+                <div class="tab-item" onclick="loadQuestions('deep', this)">깊은 질문</div>
+                <div class="tab-item" onclick="loadQuestions('fun', this)">재미있는 질문</div>
             </div>
             <div id="question-list-container"></div>
             <button class="btn-full" onclick="sendRequest('질문')">질문 보내기</button>
@@ -160,6 +326,10 @@
                 <span style="font-weight: 700;">설정</span>
                 <span></span>
             </header>
+            <div id="host-only-settings" class="hidden">
+                <h3 style="margin: 20px 0 10px 10px;">방장 관리 메뉴</h3>
+                <button onclick="deleteRoom()" class="btn-full" style="background: #FFF0F5; color: #FF528F; border: 1px solid #FF528F; margin-bottom: 20px;">방 폭파시키기 (삭제)</button>
+            </div>
             <div class="menu-card">
                 <div class="menu-icon">🔔</div>
                 <div class="menu-info"><div class="menu-title">알림 설정</div></div>
@@ -268,62 +438,41 @@
             <button class="btn-outline" style="margin-top: 15px; border: none; background: #F8F8F8; color: #AAA;" onclick="showView('game-view')">게임 종료</button>
         </section>
 
-        <!-- 11. 호감도 확인 -->
-        <section id="liking-view" class="view hidden">
-            <header>
-                <span class="back-btn" onclick="showView('dashboard-view')">&lt;</span>
-                <span style="font-weight: 700;">내 호감도 확인 (비밀)</span>
-                <span></span>
-            </header>
-            <div style="padding: 20px;">
-                <h3>내가 느끼는 호감도</h3>
-                <div class="heart-container">
-                    <span class="heart" onclick="setLiking(1)">❤️</span>
-                    <span class="heart" onclick="setLiking(2)">❤️</span>
-                    <span class="heart" onclick="setLiking(3)">❤️</span>
-                    <span class="heart" onclick="setLiking(4)">❤️</span>
-                    <span class="heart" onclick="setLiking(5)">❤️</span>
-                </div>
-                <div style="margin-top: 40px;">
-                    <h3>상대방 호감도 (AI 추정)</h3>
-                    <div style="margin-top: 20px;">
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
-                            <div style="display: flex; align-items: center;">
-                                <div style="width: 40px; height: 40px; background: #EEE; border-radius: 50%; margin-right: 15px;"></div>
-                                <div>
-                                    <div style="font-weight: 700;">김민수</div>
-                                    <div style="font-size: 12px; color: #888;">호감 있어 보여요 😊</div>
-                                </div>
-                            </div>
-                            <div style="color: var(--primary-pink); font-weight: 700;">80%</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <p style="text-align: center; color: #CCC; font-size: 11px; margin-top: auto;">* AI 분석으로 참고용이에요!</p>
-        </section>
-
-        <!-- 실시간 자리배치(기존 기능) -->
+        <!-- 실시간 자리배치 -->
         <section id="matching-view" class="view hidden">
             <header>
                 <span class="back-btn" onclick="showView('dashboard-view')">&lt;</span>
                 <span style="font-weight: 700;">사랑의 짝대기</span>
                 <span></span>
             </header>
-            <div id="participant-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 20px;">
-                <!-- 동적 생성 -->
+            
+            <!-- 투표 단계 UI -->
+            <div id="matching-voting-area">
+                <p class="subtitle" style="margin-bottom: 20px; font-size: 16px; height: auto;">마음에 드는 상대방을 선택해주세요!</p>
+                <div id="participant-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 20px;">
+                    <!-- 동적 생성 -->
+                </div>
+                <div id="wait-msg" style="text-align: center; color: #AAA; margin: 20px;">상대 팀원이 아직 없습니다...</div>
+                <div id="voted-waiting-msg" class="hidden" style="text-align: center; padding: 40px 20px;">
+                    <div class="loader" style="margin: 0 auto 20px;"></div>
+                    <p style="font-weight: 600; color: var(--primary-pink);">투표 완료!</p>
+                    <p style="font-size: 14px; color: var(--light-gray); margin-top: 10px;">다른 분들이 투표를 마칠 때까지<br>잠시만 기다려주세요.</p>
+                    <p id="vote-progress" style="margin-top: 20px; font-size: 13px; color: #CCC;"></p>
+                </div>
             </div>
-            <div id="wait-msg" style="text-align: center; color: #AAA; margin: 20px;">상대 팀원이 아직 없습니다...</div>
-            <button id="disconnect-btn" class="btn-outline" style="margin-top: auto;">매칭 종료</button>
-        </section>
 
-        <!-- 결과 모달 -->
-        <div id="result-modal" class="modal hidden">
-            <div class="modal-content">
-                <div id="result-text" style="white-space: pre-wrap; font-size: 15px; color: var(--gray-text); margin-bottom: 20px;"></div>
-                <button id="close-modal-btn" class="btn-full" style="margin-top: 0;">확인</button>
+            <!-- 결과 공개 UI -->
+            <div id="matching-result-area" class="hidden" style="padding: 20px;">
+                <div class="content-box" style="text-align: center; border: 2px solid var(--primary-pink); background: var(--light-pink);">
+                    <h2 style="color: var(--primary-pink); margin-bottom: 20px;">💖 최종 자리 배치 💖</h2>
+                    <div id="matching-result-display" style="white-space: pre-line; font-size: 18px; line-height: 2; font-weight: 600; color: var(--gray-text);">
+                    </div>
+                </div>
+                <button class="btn-outline" style="margin-top: 30px; border-color: #EEE; color: #AAA;" onclick="resetMatching()">결과 초기화 (다시 하기)</button>
             </div>
-        </div>
+
+            <button id="disconnect-btn" class="btn-outline" style="margin-top: auto;" onclick="clearSession()">매칭 종료</button>
+        </section>
     </div>
 
     <script src="/static/script.js"></script>
