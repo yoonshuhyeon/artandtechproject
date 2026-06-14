@@ -210,10 +210,11 @@ async def pick_partner(room_code: str, client_id: str, data: dict):
         remaining_m = [m['id'] for m in males if m['id'] not in matched_males]
         random.shuffle(remaining_f); random.shuffle(remaining_m)
         for f, m in list(zip(remaining_f, remaining_m)): final_pairs.append((f, m))
+        
         prompt = random.choice(PROMPTS)
-        msg = f"🎉 설렘 가득! 오늘의 자리 배치 🎉\n\n"
-        for f, m in final_pairs: msg += f"✨ {room.participants[f]['name']} ❤️ {room.participants[m]['name']}\n"
-        room.result_message = msg + f"\n💡 미션: {prompt}"
+        # 프론트엔드 파서에 맞게 '이름 -> 이름 | 이름 -> 이름' 형식으로 생성
+        pairs_str = " | ".join([f"{room.participants[f]['name']} -> {room.participants[m]['name']}" for f, m in final_pairs])
+        room.result_message = f"🎉 설렘 가득! 오늘의 자리 배치 🎉\n\n{pairs_str}\n\n💡 미션: {prompt}"
         room.is_matching_complete = True
     save_room(room)
     return {"status": "ok"}
