@@ -1,14 +1,5 @@
-<<<<<<< HEAD
-fastapi==0.115.0
-uvicorn[standard]==0.30.6
-pydantic==2.8.2
-python-dotenv==1.0.1
-pytest==8.3.2
-httpx==0.27.2
-=======
 fastapi
 uvicorn
 jinja2
 python-multipart
 upstash-redis
->>>>>>> 3b49858552dbbe3d1c26df4e81b1bbab4322b955
