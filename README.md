@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # atc-backend
 
 Python/FastAPI backend for the atc MVP.
