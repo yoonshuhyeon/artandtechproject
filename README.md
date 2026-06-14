@@ -1,3 +1,21 @@
+# atc-backend
+
+Python/FastAPI backend for the atc MVP.
+
+## Run
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
+
+## Notes
+- WebSocket endpoint: `ws://localhost:8000/ws/{room_code}`
+- Create room: `POST /rooms`
+# ate
+=======
 # 요:앵이팅 (Yo:Aengting) - 실시간 과팅 도우미
 
 과팅 현장에서 실시간으로 자리 배치, 대화 주제 추천, 긴급 도움 요청 등을 도와주는 웹 애플리케이션 프로토타입입니다.
@@ -42,3 +60,4 @@ uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 ## 📝 참고 사항
 - 본 프로젝트는 프로토타입으로, 현재 데이터는 서버 메모리(`ROOMS` dict)에 저장됩니다. 서버 재시작 시 데이터가 초기화됩니다.
 - 실운영 시 Redis 또는 Database 도입이 필요합니다.
+>>>>>>> 3b49858552dbbe3d1c26df4e81b1bbab4322b955
