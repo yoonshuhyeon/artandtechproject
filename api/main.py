@@ -29,7 +29,8 @@ class RoomState:
     location: str = ""
     meeting_time: str = ""
     reservation_name: str = ""
-    target_count: int = 0  # 목표 인원수 추가
+    male_count: int = 0    # 설정된 남성 수
+    female_count: int = 0  # 설정된 여성 수
     participants: dict[str, dict] = field(default_factory=dict)
     picks: dict[str, str] = field(default_factory=dict)
     result_message: str = ""
@@ -108,9 +109,11 @@ async def create_room(data: dict):
     if not room_code: room_code = uuid.uuid4().hex[:4].upper()
     if get_room(room_code): raise HTTPException(status_code=400, detail="이미 존재하는 방 코드입니다.")
     
-    target_count = 0
+    m_count = 0
+    f_count = 0
     try:
-        target_count = int(data.get("target_count", 0))
+        m_count = int(data.get("male_count", 0))
+        f_count = int(data.get("female_count", 0))
     except: pass
 
     new_room = RoomState(
@@ -118,7 +121,8 @@ async def create_room(data: dict):
         location=data.get("location", "장소 미정"), 
         meeting_time=data.get("meeting_time", "시간 미정"), 
         reservation_name=data.get("reservation_name", ""),
-        target_count=target_count
+        male_count=m_count,
+        female_count=f_count
     )
     save_room(new_room)
     return {"room_code": room_code}
@@ -143,6 +147,19 @@ async def delete_room(room_code: str, host_id: str):
     if not room: raise HTTPException(status_code=404, detail="Room not found")
     if room.host_id != host_id: raise HTTPException(status_code=403, detail="방장만 방을 폭파할 수 있습니다.")
     delete_room_data(room_code)
+    return {"status": "ok"}
+
+@app.post("/api/leave/{room_code}/{client_id}")
+async def leave_room(room_code: str, client_id: str):
+    room = get_room(room_code)
+    if not room: return {"status": "room_not_found"}
+    if client_id in room.participants:
+        del room.participants[client_id]
+        if client_id in room.picks: del room.picks[client_id]
+        if room.host_id == client_id:
+            if room.participants: room.host_id = list(room.participants.keys())[0]
+            else: room.host_id = ""
+        save_room(room)
     return {"status": "ok"}
 
 @app.delete("/api/kick/{room_code}/{host_id}/{target_id}")
@@ -212,13 +229,16 @@ async def reset_matching(room_code: str):
 @app.get("/api/status/{room_code}")
 async def get_status(room_code: str):
     room = get_room(room_code)
-    if not room: return {"participants": [], "result": "ROOM_DELETED"} # 방 삭제 시 시그널
-    m_count = len([p for p in room.participants.values() if p['gender'] == 'M'])
-    f_count = len([p for p in room.participants.values() if p['gender'] == 'F'])
+    if not room: return {"participants": [], "result": "ROOM_DELETED"}
+    if room.participants and (not room.host_id or room.host_id not in room.participants):
+        room.host_id = list(room.participants.keys())[0]
+        save_room(room)
+    cur_m = len([p for p in room.participants.values() if p['gender'] == 'M'])
+    cur_f = len([p for p in room.participants.values() if p['gender'] == 'F'])
     return {
         "participants": list(room.participants.values()), "result": room.result_message,
         "is_matching_complete": room.is_matching_complete, "location": room.location,
         "meeting_time": room.meeting_time, "reservation_name": room.reservation_name,
-        "target_count": room.target_count,
-        "m_count": m_count, "f_count": f_count, "host_id": room.host_id
+        "male_count": room.male_count, "female_count": room.female_count,
+        "m_count": cur_m, "f_count": cur_f, "host_id": room.host_id
     }

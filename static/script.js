@@ -89,7 +89,8 @@ document.getElementById('join-btn').addEventListener('click', async () => {
 
 async function createRoom() {
     const code = document.getElementById('create-room-code').value.trim().toUpperCase();
-    const targetCount = document.getElementById('create-target-count').value;
+    const maleCount = document.getElementById('create-male-count').value || 0;
+    const femaleCount = document.getElementById('create-female-count').value || 0;
     const location = document.getElementById('create-location').value.trim();
     const time = document.getElementById('create-time').value.trim();
     const reservation = document.getElementById('create-reservation').value.trim();
@@ -99,7 +100,7 @@ async function createRoom() {
         const res = await fetch('/api/create', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ room_code: code, target_count: targetCount, location: location, meeting_time: time, reservation_name: reservation })
+            body: JSON.stringify({ room_code: code, male_count: maleCount, female_count: femaleCount, location: location, meeting_time: time, reservation_name: reservation })
         });
         if (!res.ok) { const err = await res.json(); alert(err.detail || "방 생성에 실패했습니다."); return; }
         const data = await res.json();
@@ -140,7 +141,7 @@ function renderMatchingUI(data) {
         participantList.classList.add('hidden');
         votedWaitingMsg.classList.remove('hidden');
         if (data && data.participants) {
-            voteProgress.innerText = `현재 참여 인원: ${data.participants.length}명 / 목표: ${data.target_count || '?'}명`;
+            voteProgress.innerText = `현재 참여: 남 ${data.m_count}/${data.male_count || '?'} | 여 ${data.f_count}/${data.female_count || '?'}`;
         }
     } else {
         participantList.classList.remove('hidden');
@@ -166,7 +167,6 @@ function startPolling() {
                 location.reload();
                 return;
             }
-            // 방장 전용 메뉴 표시
             if (myId === data.host_id) {
                 document.getElementById('host-only-settings').classList.remove('hidden');
             } else {
@@ -268,7 +268,6 @@ async function resetMatching() {
 function loadQuestions(category, element) {
     const container = document.getElementById('question-list-container');
     if (!container) return;
-    // 탭 활성화 처리
     if (element) {
         element.parentElement.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
         element.classList.add('active');
@@ -285,7 +284,17 @@ function selectItem(element) {
 window.nextGameCard = () => { currentGameCardIndex = (currentGameCardIndex + 1) % GAME_CARDS.length; document.querySelector('.game-card-item').innerText = GAME_CARDS[currentGameCardIndex]; };
 window.prevGameCard = () => { currentGameCardIndex = (currentGameCardIndex - 1 + GAME_CARDS.length) % GAME_CARDS.length; document.querySelector('.game-card-item').innerText = GAME_CARDS[currentGameCardIndex]; };
 window.sendRequest = (type) => { alert(`${type} 요청을 보냈습니다.`); showView('dashboard-view'); };
-window.clearSession = () => { if (confirm("정말 나가시겠습니까?")) { localStorage.clear(); location.reload(); } };
+window.clearSession = async () => { 
+    if (confirm("정말 나가시겠습니까?")) { 
+        if (currentRoomCode && myId) {
+            try {
+                await fetch(`/api/leave/${currentRoomCode}/${myId}`, { method: 'POST' });
+            } catch (e) { console.error("Leave error", e); }
+        }
+        localStorage.clear(); 
+        location.reload(); 
+    } 
+};
 window.copyInviteLink = () => {
     const inviteUrl = `${window.location.origin}/?room=${currentRoomCode}`;
     navigator.clipboard.writeText(inviteUrl).then(() => alert("초대 링크가 복사되었습니다!"));

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>요:앵이팅 - 실시간 과팅 도우미</title>
+    <title>썸웨워 - 실시간 과팅 도우미</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
@@ -14,7 +14,7 @@
             <div style="text-align: center; margin-bottom: 30px;">
                 <img src="/assets/helper.png" alt="앵이" style="width: 250px; height: auto;">
             </div>
-            <p class="subtitle">여러분의 든든한 과팅 파트너<br><span style="color: var(--primary-pink); font-weight: 700;">'요:앵이팅'</span>이에요!<br><br>좋은 만남이 될 수 있도록<br>최선을 다해 도와드릴게요!</p>
+            <p class="subtitle">여러분의 든든한 과팅 파트너<br><span style="color: var(--primary-pink); font-weight: 700;">'썸웨워'</span>이에요!<br><br>좋은 만남이 될 수 있도록<br>최선을 다해 도와드릴게요!</p>
             <button onclick="showView('loading-view')" class="btn-full">시작하기</button>
         </section>
 
@@ -25,7 +25,7 @@
                     <span style="font-size: 30px; color: white;">❤️</span>
                 </div>
                 <h3>실시간 과팅 도우미 앱</h3>
-                <h1 style="color: var(--primary-pink); margin-top: 5px;">요:앵이팅</h1>
+                <h1 style="color: var(--primary-pink); margin-top: 5px;">썸웨워</h1>
                 <p class="subtitle">과팅이 잡히면, 그 순간부터<br>당신의 실시간 주선자가 되어드려요.</p>
                 <div style="text-align: left; padding: 0 40px; color: var(--gray-text); font-size: 14px;">
                     <p style="margin-bottom: 12px;"><span style="color: var(--primary-pink); margin-right: 10px;">●</span> 실시간 매칭 정보</p>
@@ -88,10 +88,16 @@
             </div>
 
             <div class="input-group">
-                <label for="create-target-count">목표 인원수 (총 인원)</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">👥</span>
-                    <input type="number" id="create-target-count" placeholder="예: 4 (총 4명 모임)" min="2">
+                <label>목표 인원수</label>
+                <div style="display: flex; gap: 10px;">
+                    <div class="input-wrapper" style="flex: 1;">
+                        <span class="input-icon">♂️</span>
+                        <input type="number" id="create-male-count" placeholder="남성 수" min="0">
+                    </div>
+                    <div class="input-wrapper" style="flex: 1;">
+                        <span class="input-icon">♀️</span>
+                        <input type="number" id="create-female-count" placeholder="여성 수" min="0">
+                    </div>
                 </div>
             </div>
 
@@ -249,7 +255,7 @@
         <section id="dashboard-view" class="view hidden" style="padding: 0;">
             <header>
                 <span style="font-size: 20px;">❤️</span>
-                <span style="font-weight: 700;">요:앵이팅</span>
+                <span style="font-weight: 700;">썸웨워</span>
                 <span></span>
             </header>
             <div style="padding: 20px;">
