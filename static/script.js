@@ -128,15 +128,48 @@ function renderMatchingUI(data) {
     const participantList = document.getElementById('participant-list');
     const votedWaitingMsg = document.getElementById('voted-waiting-msg');
     const voteProgress = document.getElementById('vote-progress');
+    const couplesList = document.getElementById('matching-couples-list');
+    const missionText = document.getElementById('matching-mission-text');
+
     if (!votingArea) return;
+
     if (data && data.result && data.result !== "ROOM_DELETED") {
         votingArea.classList.add('hidden');
         resultArea.classList.remove('hidden');
-        document.getElementById('matching-result-display').innerText = data.result;
+        
+        // 결과 파싱 및 동적 렌더링
+        const lines = data.result.split('\n');
+        const couplesLine = lines.find(l => l.includes('->'));
+        const missionLine = lines.find(l => l.includes('💡 미션:'));
+
+        if (couplesLine && couplesList.children.length === 0) {
+            const couples = couplesLine.split('|').map(s => s.trim());
+            couplesList.innerHTML = "";
+            couples.forEach((couple, index) => {
+                const [female, male] = couple.split('->').map(s => s.trim());
+                const card = document.createElement('div');
+                card.className = "couple-card";
+                card.style.animationDelay = `${index * 0.4}s`; // 순차적으로 등장
+                card.innerHTML = `
+                    <span class="person-tag female">${female}</span>
+                    <span class="matching-arrow">💘</span>
+                    <span class="person-tag male">${male}</span>
+                `;
+                couplesList.appendChild(card);
+            });
+        }
+
+        if (missionLine) {
+            missionText.innerText = missionLine.replace('💡 미션:', '').trim();
+        }
         return;
     }
+    
+    // 매칭 완료가 아닐 때는 리스트 초기화
+    couplesList.innerHTML = "";
     resultArea.classList.add('hidden');
     votingArea.classList.remove('hidden');
+    
     if (hasIVoted) {
         participantList.classList.add('hidden');
         votedWaitingMsg.classList.remove('hidden');

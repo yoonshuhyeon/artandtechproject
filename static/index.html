@@ -463,9 +463,18 @@
 
             <!-- 결과 공개 UI -->
             <div id="matching-result-area" class="hidden" style="padding: 20px;">
-                <div class="content-box" style="text-align: center; border: 2px solid var(--primary-pink); background: var(--light-pink);">
-                    <h2 style="color: var(--primary-pink); margin-bottom: 20px;">💖 최종 자리 배치 💖</h2>
-                    <div id="matching-result-display" style="white-space: pre-line; font-size: 18px; line-height: 2; font-weight: 600; color: var(--gray-text);">
+                <div class="result-container">
+                    <div class="result-header">
+                        <span class="heart-pulse">❤️</span>
+                        <h2>최종 매칭 결과</h2>
+                        <span class="heart-pulse">❤️</span>
+                    </div>
+                    <div id="matching-couples-list" class="couples-grid">
+                        <!-- 스크립트에서 동적으로 커플 카드 생성 -->
+                    </div>
+                    <div id="matching-mission-box" class="mission-box">
+                        <span class="mission-tag">오늘의 미션</span>
+                        <p id="matching-mission-text"></p>
                     </div>
                 </div>
                 <button class="btn-outline" style="margin-top: 30px; border-color: #EEE; color: #AAA;" onclick="resetMatching()">결과 초기화 (다시 하기)</button>
