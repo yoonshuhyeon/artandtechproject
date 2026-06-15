@@ -128,10 +128,23 @@ h1 { font-size: 22px; font-weight: 700; color: var(--gray-text); text-align: cen
     font-size: 18px;
     font-weight: 700;
     cursor: pointer;
+    margin-top: -80px;
+}
+.btn-full:active { opacity: 0.8; }
+
+.btn-full2 {
+    width: 100%;
+    height: 56px;
+    background-color: var(--primary-pink);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
     margin-top: auto;
 }
-
-.btn-full:active { opacity: 0.8; }
+.btn-full2:active { opacity: 0.8; }
 
 .btn-outline {
     width: 100%;
